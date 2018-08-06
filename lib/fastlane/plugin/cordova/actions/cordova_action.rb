@@ -18,8 +18,7 @@ module Fastlane
 
       IOS_ARGS_MAP = {
         type: 'packageType',
-        team_id: 'developmentTeam',
-        provisioning_profile: 'provisioningProfile',
+        code_sign_identity: 'codeSignIdentity'
       }
 
       def self.get_platform_args(params, args_map)
@@ -44,10 +43,6 @@ module Fastlane
 
       def self.get_ios_args(params)
         app_identifier = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
-
-        if params[:provisioning_profile].empty?
-          params[:provisioning_profile] = ENV['SIGH_UUID'] || ENV["sigh_#{app_identifier}_#{params[:type].sub("-","")}"]
-        end
 
         if params[:type] == 'adhoc'
           params[:type] = 'ad-hoc'
@@ -169,20 +164,6 @@ module Fastlane
             end
           ),
           FastlaneCore::ConfigItem.new(
-            key: :team_id,
-            env_name: "CORDOVA_IOS_TEAM_ID",
-            description: "The development team (Team ID) to use for code signing",
-            is_string: true,
-            default_value: CredentialsManager::AppfileConfig.try_fetch_value(:team_id)
-          ),
-          FastlaneCore::ConfigItem.new(
-            key: :provisioning_profile,
-            env_name: "CORDOVA_IOS_PROVISIONING_PROFILE",
-            description: "GUID of the provisioning profile to be used for signing",
-            is_string: true,
-            default_value: ''
-          ),
-          FastlaneCore::ConfigItem.new(
             key: :keystore_path,
             env_name: "CORDOVA_ANDROID_KEYSTORE_PATH",
             description: "Path to the Keystore for Android",
@@ -209,6 +190,14 @@ module Fastlane
             description: "Android Keystore alias",
             is_string: true,
             default_value: ''
+          ),
+          FastlaneCore::ConfigItem.new(
+            key: :code_sign_identity,
+            env_name: "CORDOVA_CODE_SIGN_IDENTITY",
+            description: "Code Sign Identity for iOS",
+            optional: true,
+            is_string: true,
+            default_value: 'iPhone Developer'
           ),
           FastlaneCore::ConfigItem.new(
             key: :build_number,
